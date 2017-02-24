@@ -1,0 +1,121 @@
+## --------------------------
+## 显示XML文档的控件
+##
+#@ charset    UTF-8
+#@ trimming   on
+#@ whitespace collapse
+## --------------------------
+
+<div class="webx-dom">
+  $#{controlBar}
+  ${elementList: #orderedElementList, #unorderedElementList}
+</div>
+
+#controlBar
+  <div class="control-bar">
+    <span><a id="expand-all" href="#">Expand All</a></span>
+    <span><a id="collapse-all" href="#">Collapse All</a></span>
+  </div>
+#end
+
+#orderedElementList
+  <ol>
+    ${elements: #elements.*}
+  </ol>
+#end
+
+#unorderedElementList
+  <ul>
+    ${elements: #elements.*}
+  </ul>
+#end
+
+## 模板组：三种形态的elements
+#elements
+  #withSubElements
+    <li>
+      <p>$#{elementStart}<span class="hl-tag">&gt;</span>
+        <img id="handle-${elementId}" class="handle-element" src="${componentUrl:images/open.png}" alt="" title="Click to show/hide sub-elements" />
+        <span id="collapsed-${elementId}" class="collapsed-element">...<span class="hl-tag">&lt;/$#{elementPrefixAndName}&gt;</span></span>
+      </p>
+      <div id="expanded-${elementId}" class="expanded-element">
+        <ul>${subElements: #elements.*}</ul>
+        <p><span class="hl-tag">&lt;/$#{elementPrefixAndName}&gt;</span></p>
+      </div>
+    </li>
+  #end
+
+  #selfClosed
+    <li>
+      <p>$#{elementStart}<span class="hl-tag"> /&gt;</span></p>
+    </li>
+  #end
+
+  #withText
+    <li>
+      ${elementTexts: #singleLineText, #multiLineText}
+    </li>
+
+    #singleLineText
+      <p>$#{elementStart}&gt;<span class="hl-text">${elementText: #styledTexts.*}</span><span class="hl-tag">&lt;/$#{elementPrefixAndName}&gt;</span></p>
+    #end
+
+    #multiLineText
+      <p>$#{elementStart}<span class="hl-tag">&gt;</span>
+        <img id="handle-${elementId}" class="handle-element" src="${componentUrl:images/open.png}" alt="" title="Click to show/hide sub-elements" />
+        <span id="collapsed-${elementId}" class="collapsed-element">...<span class="hl-tag">&lt;/$#{elementPrefixAndName}&gt;</span></span>
+      </p>
+      <div id="expanded-${elementId}" class="expanded-element">
+        <pre class="hl-cdata">&lt;![CDATA[${elementText: #styledTexts.*}]]&gt;</pre>
+        <p><span class="hl-tag">&lt;/$#{elementPrefixAndName}&gt;</span></p>
+      </div>
+    #end
+  #end
+#end
+
+#elementStart
+  <span class="hl-tag"$#{elementNs}>&lt;$#{elementPrefixAndName}</span>$#{attribute}
+
+  #attribute
+    <span class="hl-attribute"> ${attributeKey}</span>=<span class="hl-value">"${attributeValue: #styledTexts.*}"</span>
+  #end
+
+  #elementNs
+    $#{SPACE}title="Namespace: ${elementNs}"
+  #end
+#end
+
+#elementPrefixAndName
+  $#{elementPrefix}${elementName}
+
+  #elementPrefix
+    <span class="hl-tag-prefix">${elementPrefix}:</span>
+  #end
+#end
+
+## 模板组：多种文本格式
+#styledTexts
+  #textValue
+    ${value}
+  #end
+
+  #rawValue
+    raw: (<span class="hl-package">${packageName}</span><span class="hl-class">${className}</span>) ${value}
+  #end
+
+  #classValue
+    <span class="hl-package">${packageName}</span><span class="hl-class">${className}</span>
+  #end
+
+  #anchorValue
+    $#{sep}<a id="${anchorName}"><!--${anchorNameDisplay}--></a><span class="hl-anchor">${anchorNameDisplay}</span>
+  #end
+
+  #refValue
+    $#{sep}<a href="#${refName}" class="hl-ref">${refNameDisplay}</a>
+  #end
+#end
+
+#sep
+  ,$#{SPACE}
+#end

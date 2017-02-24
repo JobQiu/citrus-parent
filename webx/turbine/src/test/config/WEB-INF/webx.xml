@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:request-contexts="http://www.alibaba.com/schema/services/request-contexts"
+             xmlns:stores="http://www.alibaba.com/schema/services/request-contexts/session/stores"
+             xmlns:uris="http://www.alibaba.com/schema/services/uris"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/request-contexts http://localhost:8080/schema/services-request-contexts.xsd
+                 http://www.alibaba.com/schema/services/request-contexts/session/stores http://localhost:8080/schema/services-request-contexts-session-stores.xsd
+                 http://www.alibaba.com/schema/services/uris http://localhost:8080/schema/services-uris.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <services:property-placeholder />
+
+    <services:webx-configuration>
+        <productionMode>${productionMode:false}</productionMode>
+    </services:webx-configuration>
+
+    <services:request-contexts id="requestContexts">
+        <request-contexts:rewrite />
+        <request-contexts:parser useServletEngineParser="true" />
+        <request-contexts:lazy-commit />
+        <request-contexts:set-locale />
+        <request-contexts:buffered />
+        <request-contexts:session>
+            <stores>
+                <stores:simple-memory-store id="simple" />
+            </stores>
+            <store-mappings>
+                <match name="*" store="simple" />
+            </store-mappings>
+        </request-contexts:session>
+    </services:request-contexts>
+
+    <services:uris>
+        <uris:uri id="link1" exposed="true">
+            <serverURI>http://www.taobao.com/</serverURI>
+        </uris:uri>
+        <uris:turbine-uri id="link2" exposed="true" extends="link1" />
+    </services:uris>
+
+</beans:beans>

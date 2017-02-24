@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:request-contexts="http://www.alibaba.com/schema/services/request-contexts"
+             xmlns:encoders="http://www.alibaba.com/schema/services/request-contexts/session/encoders"
+             xmlns:encrypters="http://www.alibaba.com/schema/services/request-contexts/session/encrypters"
+             xmlns:idgens="http://www.alibaba.com/schema/services/request-contexts/session/idgens"
+             xmlns:stores="http://www.alibaba.com/schema/services/request-contexts/session/stores"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/request-contexts http://localhost:8080/schema/services-request-contexts.xsd
+                 http://www.alibaba.com/schema/services/request-contexts/session/encoders http://localhost:8080/schema/services-request-contexts-session-encoders.xsd
+                 http://www.alibaba.com/schema/services/request-contexts/session/encrypters http://localhost:8080/schema/services-request-contexts-session-encrypters.xsd
+                 http://www.alibaba.com/schema/services/request-contexts/session/idgens http://localhost:8080/schema/services-request-contexts-session-idgens.xsd
+                 http://www.alibaba.com/schema/services/request-contexts/session/stores http://localhost:8080/schema/services-request-contexts-session-stores.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <!-- 测试cookie store -->
+    <services:request-contexts id="session_cookie">
+        <request-contexts:buffered />
+        <request-contexts:lazy-commit />
+        <request-contexts:session maxInactiveInterval="10" modelKey="SESSION_MODEL" keepInTouch="false">
+            <id cookieEnabled="true" urlEncodeEnabled="false">
+                <cookie name="JSESSIONID" domain=".taobao.com" path="/" maxAge="10" />
+                <url-encode name="JSESSIONID" />
+                <idgens:random-id-generator length="20" />
+            </id>
+            <stores>
+                <stores:cookie-store id="cookie1">
+                    <cookie name="myCookieStore" />
+                </stores:cookie-store>
+            </stores>
+            <store-mappings>
+                <match name="*" store="cookie1" />
+            </store-mappings>
+        </request-contexts:session>
+    </services:request-contexts>
+
+    <!-- 测试cookie store -->
+    <services:request-contexts id="session_cookie_override_settings">
+        <request-contexts:buffered />
+        <request-contexts:lazy-commit />
+        <request-contexts:session>
+            <id>
+                <cookie domain=".taobao.com" />
+            </id>
+            <stores>
+                <stores:cookie-store id="cookie7">
+                    <cookie name="myCookieStore" httpOnly="false" secure="true" />
+                </stores:cookie-store>
+            </stores>
+            <store-mappings>
+                <match name="*" store="cookie7" />
+            </store-mappings>
+        </request-contexts:session>
+    </services:request-contexts>
+
+    <!-- 测试cookie store，包含checksum -->
+    <services:request-contexts id="session_cookie_checksum">
+        <request-contexts:buffered />
+        <request-contexts:lazy-commit />
+        <request-contexts:session maxInactiveInterval="10" modelKey="SESSION_MODEL" keepInTouch="false">
+            <id cookieEnabled="true" urlEncodeEnabled="false">
+                <cookie name="JSESSIONID" domain=".taobao.com" path="/" maxAge="10" httpOnly="false" />
+                <url-encode name="JSESSIONID" />
+                <idgens:uuid-generator />
+            </id>
+            <stores>
+                <stores:cookie-store id="cookie2" checksum="true">
+                    <cookie name="myCookieStore" />
+                </stores:cookie-store>
+            </stores>
+            <store-mappings>
+                <match name="*" store="cookie2" />
+            </store-mappings>
+        </request-contexts:session>
+    </services:request-contexts>
+
+    <!-- 测试cookie store，多个encoders -->
+    <services:request-contexts id="session_multi_encoders_1">
+        <request-contexts:buffered />
+        <request-contexts:lazy-commit />
+        <request-contexts:session>
+            <stores>
+                <stores:cookie-store id="cookie3">
+                    <cookie name="myCookieStore" />
+                    <encoders>
+                        <encoders:serialization-encoder />
+                        <encoders:serialization-encoder>
+                            <encrypters:aes-encrypter key="0123456789abcdef" />
+                        </encoders:serialization-encoder>
+                    </encoders>
+                </stores:cookie-store>
+            </stores>
+            <store-mappings>
+                <match name="*" store="cookie3" />
+            </store-mappings>
+        </request-contexts:session>
+    </services:request-contexts>
+
+    <!-- 测试cookie store，多个encoders -->
+    <services:request-contexts id="session_multi_encoders_2">
+        <request-contexts:buffered />
+        <request-contexts:lazy-commit />
+        <request-contexts:session>
+            <stores>
+                <stores:cookie-store id="cookie4">
+                    <cookie name="myCookieStore" />
+                    <encoders>
+                        <encoders:serialization-encoder>
+                            <encrypters:aes-encrypter key="0123456789abcdef" />
+                        </encoders:serialization-encoder>
+                        <encoders:serialization-encoder />
+                    </encoders>
+                </stores:cookie-store>
+            </stores>
+            <store-mappings>
+                <match name="*" store="cookie4" />
+            </store-mappings>
+        </request-contexts:session>
+    </services:request-contexts>
+
+    <!-- 测试survivesInInvalidating -->
+    <services:request-contexts id="session_survives_in_invalidating">
+        <request-contexts:buffered />
+        <request-contexts:lazy-commit />
+        <request-contexts:session>
+            <stores>
+                <stores:cookie-store id="cookie5">
+                    <cookie name="c1" />
+                </stores:cookie-store>
+                <stores:cookie-store id="cookie6">
+                    <cookie name="c2" maxAge="10" survivesInInvalidating="true" />
+                </stores:cookie-store>
+            </stores>
+            <store-mappings>
+                <match name="*" store="cookie5" />
+                <match name="loginName" store="cookie6" />
+            </store-mappings>
+        </request-contexts:session>
+    </services:request-contexts>
+
+</beans:beans>

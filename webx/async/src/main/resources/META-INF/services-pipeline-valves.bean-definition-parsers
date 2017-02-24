@@ -1,0 +1,2 @@
+performRunnableAsync=com.alibaba.citrus.async.pipeline.valve.PerformRunnableAsyncValve$DefinitionParser
+doPerformRunnable=com.alibaba.citrus.async.pipeline.valve.DoPerformRunnableValve$DefinitionParser

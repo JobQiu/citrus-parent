@@ -1,0 +1,46 @@
+## --------------------------
+## 用来显示key/values的组件。
+##
+#@ charset    UTF-8
+#@ trimming   on
+#@ whitespace collapse
+## --------------------------
+<table>
+  ${row: #emptyRow, #row}
+</table>
+
+#emptyRow
+  <tr>
+    <td>&lt;no values&gt;</td>
+  </tr>
+#end
+
+#row
+  <tr>
+    ${values: #singleValue, #multipleValues}
+  </tr>
+
+  #singleValue
+    <td class="item-key">${key}</td>
+    <td class="item-value">
+      <pre>${value}</pre>
+    </td>
+  #end
+
+  #multipleValues
+    <td class="item-key">${key} <span class="item-count">[${valueCount}]</span></td>
+    <td class="item-value">
+      <ul>
+        ${valueItem: #simpleValueItem, #entryValueItem}
+      </ul>
+    </td>
+
+    #simpleValueItem
+      <li><pre>${value}</pre></li>
+    #end
+
+    #entryValueItem
+      <li><span class="item-entry-key">${entryKey} :</span> <pre class="item-entry-value">${entryValue}</pre></li>
+    #end
+  #end
+#end

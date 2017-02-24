@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:util="http://www.springframework.org/schema/util"
+             xmlns:p="http://www.springframework.org/schema/p"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:pull-factories="http://www.alibaba.com/schema/services/pull/factories"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/pull/factories http://localhost:8080/schema/services-pull-factories.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+                 http://www.springframework.org/schema/util http://localhost:8080/schema/www.springframework.org/schema/util/spring-util.xsd
+             ">
+
+    <services:pull>
+        <pull-factories:constants id="myconst" constantClass="javax.servlet.http.HttpServletResponse" />
+
+        <pull-factories:constants id="myconst2"
+                                  constantClass="javax.servlet.http.HttpServletResponse"
+                                  exposed="false" />
+
+        <pull-factories:utils />
+
+        <pull-factories:factory id="object1"
+                                class="com.alibaba.citrus.service.pull.tool.ObjectTool"
+                                p:singleton="false" />
+
+        <pull-factories:factory id="object2"
+                                class="com.alibaba.citrus.service.pull.tool.ObjectToolSet"
+                                p:singleton="false"
+                                p:id="inset1" />
+
+        <pull-factories:factory id="object3" class="com.alibaba.citrus.service.pull.tool.ObjectRuntimeToolSet" />
+
+        <pull-factories:mixin id="myUtils">
+            <!-- 引进class中所有public static方法 -->
+            <class name="com.alibaba.citrus.util.StringUtil" />
+
+            <!-- 引进class中部分public static方法 -->
+            <class name="com.alibaba.citrus.util.StringEscapeUtil">
+
+                <!-- 引进指定的public static方法 -->
+                <method name="escapeHtml" />
+
+                <!-- 引进指定的public static方法，并改名 -->
+                <method name="escapeURL" renameTo="escapeUrl" />
+
+            </class>
+        </pull-factories:mixin>
+
+        <pull-factories:context-exposer>
+            <tool id="mymap" />
+            <tool id="mylist2" beanName="mylist" />
+        </pull-factories:context-exposer>
+
+    </services:pull>
+
+    <services:request-contexts />
+
+    <util:map xmlns="http://www.springframework.org/schema/beans"
+              id="mymap"
+              map-class="java.util.LinkedHashMap"
+              value-type="java.lang.Integer">
+        <entry key="a" value="111" />
+        <entry key="b" value="222" />
+    </util:map>
+
+    <util:list xmlns="http://www.springframework.org/schema/beans" id="mylist" value-type="java.lang.Integer">
+        <value>333</value>
+        <value>444</value>
+        <value>555</value>
+    </util:list>
+
+</beans:beans>

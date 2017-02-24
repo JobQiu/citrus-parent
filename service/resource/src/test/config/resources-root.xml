@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:loaders="http://www.alibaba.com/schema/services/resource-loading/loaders"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/resource-loading/loaders http://localhost:8080/schema/services-resource-loading-loaders.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <services:resource-loading>
+        <resource pattern="/classpath">
+            <loaders:classpath-loader />
+        </resource>
+        <resource pattern="/webroot" internal="true">
+            <loaders:webapp-loader />
+        </resource>
+        <resource-alias pattern="/" name="/webroot" />
+    </services:resource-loading>
+
+    <services:resource-loading id="resourceLoadingService_2">
+        <resource pattern="/classpath">
+            <loaders:classpath-loader />
+        </resource>
+        <resource pattern="/webroot">
+            <loaders:webapp-loader />
+        </resource>
+        <resource pattern="/">
+            <loaders:super-loader name="/webroot" />
+        </resource>
+    </services:resource-loading>
+
+    <services:resource-loading id="resourceLoadingService_1">
+        <resource pattern="/default">
+            <loaders:classpath-loader />
+            <loaders:webapp-loader />
+        </resource>
+    </services:resource-loading>
+
+    <services:resource-loading id="myParentResourceLoadingService">
+        <resource pattern="/default">
+            <loaders:classpath-loader />
+            <loaders:webapp-loader />
+        </resource>
+    </services:resource-loading>
+
+</beans:beans>

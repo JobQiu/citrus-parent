@@ -1,0 +1,36 @@
+## --------------------------
+## Tab标签控件
+##
+#@ charset    UTF-8
+#@ trimming   on
+#@ whitespace collapse
+## --------------------------
+
+<div class="webx-tabs">
+<ul class="nav">
+  $#{tab}
+</ul>
+</div>
+
+#tab
+  <li$#{selectedAttr}>
+    <a${linkAttrs: #hrefAttr, #onclickAttr}>${desc}</a>
+    $#{subnav}
+  </li>
+
+  #selectedAttr
+    $#{SPACE}class="selected"
+  #end
+
+  #hrefAttr
+    $#{SPACE}href="${hrefLink}"
+  #end
+
+  #onclickAttr
+    $#{SPACE}onclick="${onclickScript}"
+  #end
+
+  #subnav
+    <ul class="subnav">${subtabs: #tab}</ul>
+  #end
+#end

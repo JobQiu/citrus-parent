@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:uris="http://www.alibaba.com/schema/services/uris"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/uris http://localhost:8080/schema/services-uris.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <services:uris>
+
+        <uris:uri id="link1">
+            <serverURI>http://taobao.com/hello</serverURI>
+        </uris:uri>
+
+        <uris:turbine-uri id="link2" extends="link1">
+            <contextPath>mycontext</contextPath>
+            <servletPath>myservlet</servletPath>
+            <componentPath>mycomponent</componentPath>
+            <target>myTarget.vm</target>
+            <action>myAction</action>
+        </uris:turbine-uri>
+
+        <uris:turbine-uri id="link3"
+                          extends="link2"
+                          actionParam="myaction"
+                          convertTargetCase="false"
+                          targetMappingRule="mymapper" />
+
+    </services:uris>
+
+</beans:beans>

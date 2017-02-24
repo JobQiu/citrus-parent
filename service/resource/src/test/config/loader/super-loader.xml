@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:loaders="http://www.alibaba.com/schema/services/resource-loading/loaders"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/resource-loading/loaders http://localhost:8080/schema/services-resource-loading-loaders.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <beans:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
+
+    <services:resource-loading>
+        <resource pattern="/no_name">
+            <loaders:file-loader />
+            <loaders:super-loader />
+        </resource>
+
+        <resource pattern="/with_name">
+            <loaders:file-loader />
+            <loaders:super-loader name="/webroot" />
+        </resource>
+    </services:resource-loading>
+
+    <services:resource-loading id="sameName">
+        <resource pattern="/webroot">
+            <loaders:super-loader name="/webroot" />
+        </resource>
+    </services:resource-loading>
+
+    <services:resource-loading id="defaultName">
+        <resource pattern="/">
+            <loaders:super-loader name="/webroot" />
+        </resource>
+    </services:resource-loading>
+
+    <services:resource-loading id="defaultName1">
+        <resource pattern="">
+            <loaders:super-loader name="/webroot" />
+        </resource>
+    </services:resource-loading>
+
+    <services:resource-loading id="misc">
+        <resource pattern="/WEB-INF/aaa/bbb">
+            <!-- 如果在默认的地方找不到，就找file-loader -->
+            <loaders:super-loader name="/WEB-INF/aaa/bbb" />
+            <loaders:file-loader basedir="${srcdir}">
+                <path>/myfolder</path>
+            </loaders:file-loader>
+        </resource>
+
+        <resource pattern="/WEB-INF2/aaa/bbb/*">
+            <!-- 如果在默认的地方找不到，就找file-loader -->
+            <loaders:super-loader name="/WEB-INF/aaa/bbb/$1" />
+            <loaders:file-loader basedir="${srcdir}">
+                <path>/myfolder/$1</path>
+            </loaders:file-loader>
+        </resource>
+    </services:resource-loading>
+
+    <services:resource-loading id="multipleSuperLoaders">
+        <resource pattern="/*/templates/layout">
+            <loaders:super-loader name="/webroot/$1/templates/layout" />
+            <loaders:super-loader name="/webroot/common/templates/layout" />
+        </resource>
+
+        <resource pattern="/*/templates/layout2">
+            <loaders:super-loader name="/webroot2/$1/templates/layout" />
+            <loaders:super-loader name="/webroot2/common/templates/layout" />
+        </resource>
+
+        <resource pattern="/webroot2" internal="true">
+            <loaders:super-loader name="/webroot" />
+        </resource>
+    </services:resource-loading>
+
+</beans:beans>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <services:my-configuration id="conf1" parentRef="myConfiguration">
+        <productionMode>true</productionMode>
+        <stringValue>stringValue</stringValue>
+        <myBean1Ref>myBean1</myBean1Ref>
+    </services:my-configuration>
+
+    <services:my-configuration primary="true">
+        <myBean3Ref>myBean3_haha</myBean3Ref>
+    </services:my-configuration>
+
+    <beans:bean id="myBean2" class="com.alibaba.citrus.service.configuration.MyBean2" />
+    <beans:bean id="myBean3_haha" class="com.alibaba.citrus.service.configuration.MyBean3" />
+
+    <beans:bean id="myBean" class="com.alibaba.citrus.service.configuration.MyBean" />
+
+</beans:beans>

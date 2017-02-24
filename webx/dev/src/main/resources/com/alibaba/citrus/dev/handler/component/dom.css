@@ -1,0 +1,103 @@
+@charset "UTF-8";
+
+.webx-dom {
+    border: solid 1px grey;
+    margin: 0;
+}
+
+.webx-dom>ol {
+    margin: 0;
+    padding: 0 0 0 2em;
+}
+
+.webx-dom ul {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 2em;
+}
+
+.webx-dom>ul {
+    margin: 0;
+    padding: 0 0.7em;
+}
+
+.webx-dom li p {
+    margin: 0 0 0 2em;
+    padding: 0;
+    text-indent: -2em;
+}
+
+.webx-dom ol>li {
+    margin: 0.5em 0;
+}
+
+.webx-dom .control-bar {
+    background-color: #E0E0E0;
+    color: navy;
+    font-weight: bold;
+    margin: 0 0 0.5em 0;
+    padding: 0 0.7em;
+}
+
+.webx-dom .control-bar span {
+    padding: 0 1em 0 0;
+}
+
+.webx-dom .collapsed-element {
+    display: none;
+}
+
+.hl-annotation {
+    color: grey;
+    font-style: italic;
+}
+
+.hl-keyword {
+    color: #973074;
+    font-weight: bolder;
+}
+
+.hl-variable {
+    color: #0000c0;
+}
+
+.hl-tag-prefix {
+    color: #9999cc;
+    font-weight: bolder;
+}
+
+.hl-tag {
+    color: #000096;
+}
+
+.hl-attribute {
+    color: #F5844C;
+}
+
+.hl-value {
+    color: #993300;
+}
+
+.hl-text {
+}
+
+pre.hl-cdata {
+    color: green;
+}
+
+.hl-package {
+}
+
+.hl-class {
+    font-weight: bolder;
+}
+
+.hl-anchor {
+    font-weight: bolder;
+}
+
+a.hl-ref {
+    text-decoration: underline;
+    color: blue;
+    font-weight: bolder;
+}

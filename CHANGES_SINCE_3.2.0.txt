@@ -1,0 +1,93 @@
+-- Changes in 3.2.0
+
+* 重要：从本版本开始，SpringExt所生成的schema和以前版本不完全兼容。差别在于，
+  以前的schema中有一个参数：elementFormDefault="qualified"，而新版本将采用unqualified值。
+  这意味着，XML配置文件被稍微地简化了。
+
+  以form service为例，原来是这样写的：
+  <services:form>
+      <services:group name="...">
+          <services:field name="...">
+              <validators:validator class="..." />
+          </services:field>
+      </services:group>
+  </services:form>
+
+  而现在，可不写内部element的namespace前缀：
+  <services:form>
+      <group name="...">
+          <field name="...">
+              <validators:validator class="..." />
+          </field>
+      </group>
+  </services:form>
+
+  为了方便从旧格式迁移到新格式，可以在项目的根目录下，执行以下maven命令：
+
+  mvn springext:convert
+
+  该maven插件被定义在pom.xml中：
+
+  <build>
+      <plugins>
+          <plugin>
+              <groupId>com.alibaba.citrus.tool</groupId>
+              <artifactId>springext-maven-plugin</artifactId>
+              <version>1.1</version>
+          </plugin>
+      <plugins>
+  </build>
+
+* DomUtil.sameNs(element)方法的定义被修改：
+  通过sameNs(element)可以选出和element具有相同namespace的elements，或者不包含namespace的elements（unqualified elements）。
+  而修改前，unqualified elements将不会被选出来。
+  这个修改的目的是使老版的webx中的bean definition parser代码（解析qualified elements）可用来解析新版webx中的unqualified elements。
+
+-- Changes in 3.2.1
+
+* 升级到springext-maven-plugin 1.2
+* 删除intellij:annotations依赖，因为还不能全面使用这个机制，不如先删除。
+* 将velocity/freemarker的依赖改成scope=provided。应用程序如果需要的话，必须明确声明依赖它们。
+* 当SLF4J没有绑定日志系统时（即classpath中不存在诸如logback-classic或slf4j-log4j12包），避免配置出错。
+  这个修改可使autoconfig运行于maven 3.1.x中。因为在maven 3.1.x里，SLF4J被提到上层classloader中，从而找不到logback包而报错。
+* Bugfix: 修正如下问题：在<resource-loading>服务中，两个连续的<super-loader>中的第二个无法工作，例如：
+  <resource pattern="/*/templates/layout">
+      <res-loaders:super-loader name="/webroot/$1/templates/layout" />
+      <res-loaders:super-loader name="/webroot/common/templates/layout" />
+  </resource>
+* Bugfix: 修正当request.startAsync以后，每个请求都会生成cglib类，从而导致permgen溢出的问题。
+* 升级依赖包的版本：
+      spring                3.1.2   -> 3.2.4
+      slf4j                 1.6.6   -> 1.7.5
+      commons-fileupload    1.2.2   -> 1.3
+      commons-io            2.3     -> 2.4
+      commons-codec         1.6     -> 1.8
+      fastjson              1.1.23  -> 1.1.36
+      logback               1.0.6   -> 1.0.13   [provided]
+      commons-logging       1.1.1   -> 1.1.3    [provided]
+      servlet               3.0.1   -> 3.1.0    [provided]
+      javamail              1.4.1   -> 1.4.7    [provided]
+      activation            1.1     -> 1.1.1    [provided]
+      freemarker            2.3.19  -> 2.3.20   [provided]
+      groovy                1.8.6   -> 2.1.7    [runtime]
+      httpunit              1.7     -> 1.7.2    [test]
+      xerces                2.10.0  -> 2.11.0   [test]
+      easymock              3.1     -> 3.2      [test]
+      jasper                6.0.35  -> 6.0.37   [test]
+      mock-javamail         1.7     -> 1.9      [test]
+
+-- Changes in 3.2.2
+
+* Bugfix: 在servlet2.5环境中，Servlet3Util初始化失败。
+
+-- Changes in 3.2.3
+
+* Bugfix: MatchResultSubstitution，当出现很长的变量$xxxxxxxx...时，发生溢出错误，导致<rewrite>功能出错。
+* Bugfix: 在<rewrite><condition test="%{VAR}">中，避免%{VAR}中出现的$或%被解析。
+* 改进：使EntityResolver支持../xxx/yyy.xsd这样的相对路径。Apache CXF用到了这样的URL，此改进确保CXF可以在webx平台上运行。
+
+-- Changes in 3.2.4
+
+* 升级commons-fileupload，避免DOS攻击的问题。
+  参见：http://mail-archives.apache.org/mod_mbox/www-announce/201402.mbox/%3C52F373FC.9030907@apache.org%3E
+* 修正SessionStore.invalidate()方法的拼写错误，然而请注意，这会导致新版本和老版本的不兼容。

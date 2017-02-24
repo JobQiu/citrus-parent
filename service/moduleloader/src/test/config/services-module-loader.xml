@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:madapters="http://www.alibaba.com/schema/services/module-loader/adapters"
+             xmlns:mfactories="http://www.alibaba.com/schema/services/module-loader/factories"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/module-loader/adapters http://localhost:8080/schema/services-module-loader-adapters.xsd
+                 http://www.alibaba.com/schema/services/module-loader/factories http://localhost:8080/schema/services-module-loader-factories.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <services:simple-configuration />
+
+    <services:module-loader>
+        <mfactories:class-modules>
+            <search-packages type="$1" packages="com.alibaba.test.app1.module.*" />
+        </mfactories:class-modules>
+    </services:module-loader>
+
+    <services:module-loader id="includeDefaultAdapters" includeDefaultAdapters="true">
+        <mfactories:class-modules>
+            <search-packages type="$1" packages="com.alibaba.test.app1.module.*" />
+        </mfactories:class-modules>
+        <madapters:action-event-adapter />
+        <madapters:screen-event-adapter />
+        <madapters:data-binding-adapter />
+        <madapters:adapter class="com.alibaba.citrus.service.moduleloader.ModuleLoaderServiceTests$MySimpleAdapterFactory" />
+    </services:module-loader>
+
+    <services:module-loader id="dontIncludeDefaultAdapters" includeDefaultAdapters="false">
+        <mfactories:class-modules>
+            <search-packages type="$1" packages="com.alibaba.test.app1.module.*" />
+        </mfactories:class-modules>
+        <madapters:action-event-adapter />
+        <madapters:screen-event-adapter />
+        <madapters:adapter class="com.alibaba.citrus.service.moduleloader.ModuleLoaderServiceTests$MySimpleAdapterFactory" />
+    </services:module-loader>
+
+    <services:module-loader id="noCache" cacheEnabled="false">
+        <mfactories:class-modules>
+            <search-packages type="$1" packages="com.alibaba.test.app1.module.*" />
+        </mfactories:class-modules>
+    </services:module-loader>
+
+    <services:module-loader id="failure">
+        <mfactories:class-modules>
+            <search-classes type="action"
+                            name="Failure"
+                            classes="com.alibaba.test.app1.Failure"
+                            defaultLazyInit="true" />
+        </mfactories:class-modules>
+    </services:module-loader>
+
+</beans:beans>

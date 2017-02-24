@@ -1,0 +1,521 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:p="http://www.springframework.org/schema/p"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:c="http://www.alibaba.com/schema/services/pipeline/conditions"
+             xmlns:v="http://www.alibaba.com/schema/services/pipeline/valves"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/pipeline/conditions http://localhost:8080/schema/services-pipeline-conditions.xsd
+                 http://www.alibaba.com/schema/services/pipeline/valves http://localhost:8080/schema/services-pipeline-valves.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <!-- ===================== -->
+    <!-- pipelines to ref      -->
+    <!-- ===================== -->
+    <services:pipeline id="p1">
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="p2">
+        <v:log />
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="p3">
+        <v:log />
+        <v:log />
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="p_wrong">
+        <v:log />
+        <v:valve class="com.alibaba.citrus.service.pipeline.valve.WrongValve" />
+        <v:log />
+    </services:pipeline>
+
+    <!-- ===================== -->
+    <!-- break valve           -->
+    <!-- ===================== -->
+    <services:pipeline id="break-simple">
+        <v:log />
+        <v:break />
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="break-levels">
+        <!-- level 1 -->
+        <v:log />
+        <v:valve class="com.alibaba.citrus.service.pipeline.valve.LogAndInvokeSubValve">
+            <beans:constructor-arg>
+                <services:pipeline>
+                    <!-- level 2 -->
+                    <v:log />
+                    <v:valve class="com.alibaba.citrus.service.pipeline.valve.LogAndInvokeSubValve">
+                        <beans:constructor-arg>
+                            <services:pipeline>
+                                <!-- level 3 -->
+                                <v:log />
+                                <v:break levels="1" />
+                                <v:log />
+                            </services:pipeline>
+                        </beans:constructor-arg>
+                    </v:valve>
+                    <v:log />
+                </services:pipeline>
+            </beans:constructor-arg>
+        </v:valve>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="break-up-to-label" label="level1">
+        <!-- level 1 -->
+        <v:log />
+        <v:valve class="com.alibaba.citrus.service.pipeline.valve.LogAndInvokeSubValve">
+            <beans:constructor-arg>
+                <services:pipeline label="level2">
+                    <!-- level 2 -->
+                    <v:log />
+                    <v:valve class="com.alibaba.citrus.service.pipeline.valve.LogAndInvokeSubValve">
+                        <beans:constructor-arg>
+                            <services:pipeline label="level3">
+                                <!-- level 3 -->
+                                <v:log />
+                                <v:break toLabel="level2" />
+                                <v:log />
+                            </services:pipeline>
+                        </beans:constructor-arg>
+                    </v:valve>
+                    <v:log />
+                </services:pipeline>
+            </beans:constructor-arg>
+        </v:valve>
+        <v:log />
+    </services:pipeline>
+
+    <!-- ===================== -->
+    <!-- exit valve            -->
+    <!-- ===================== -->
+    <services:pipeline id="exit-whole-pipeline">
+        <!-- level 1 -->
+        <v:log />
+        <v:valve class="com.alibaba.citrus.service.pipeline.valve.LogAndInvokeSubValve">
+            <beans:constructor-arg>
+                <services:pipeline>
+                    <!-- level 2 -->
+                    <v:log />
+                    <v:valve class="com.alibaba.citrus.service.pipeline.valve.LogAndInvokeSubValve">
+                        <beans:constructor-arg>
+                            <services:pipeline>
+                                <!-- level 3 -->
+                                <v:log />
+                                <v:exit />
+                                <v:log />
+                            </services:pipeline>
+                        </beans:constructor-arg>
+                    </v:valve>
+                    <v:log />
+                </services:pipeline>
+            </beans:constructor-arg>
+        </v:valve>
+        <v:log />
+    </services:pipeline>
+
+    <!-- ===================== -->
+    <!-- loop valve            -->
+    <!-- ===================== -->
+    <services:pipeline id="loop" label="level1">
+        <v:log />
+        <v:loop label="level2" loopCounterName="count">
+            <v:log />
+            <v:break />
+            <v:log />
+        </v:loop>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="loop-break-up-to-level2" label="level1">
+        <v:log />
+        <v:loop label="level2">
+            <v:log />
+            <v:break toLabel="level2" />
+            <v:log />
+        </v:loop>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="loop-break-up-to-level1" label="level1">
+        <v:log />
+        <v:loop label="level2">
+            <v:log />
+            <v:break toLabel="level1" />
+            <v:log />
+        </v:loop>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="loop-max-loop-count">
+        <v:log />
+        <v:loop maxLoopCount="2">
+            <v:log />
+            <v:log />
+            <v:log />
+        </v:loop>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="loop-ref">
+        <v:log />
+        <v:loop maxLoopCount="2" pipeline-ref="p1" />
+        <v:log />
+    </services:pipeline>
+
+    <!-- ===================== -->
+    <!-- while loop valve      -->
+    <!-- ===================== -->
+    <services:pipeline id="while-loop" label="level1">
+        <v:log />
+        <v:while loopCounterName="count" test="count&lt;=2">
+            <v:log />
+            <v:log />
+            <v:log />
+        </v:while>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="while-loop-break-to-label">
+        <v:log />
+        <v:while label="level2">
+            <c:jexl-condition expr="1==1" />
+            <v:log />
+            <v:break-unless test="loopCount&lt;=3" toLabel="level2" />
+            <v:log />
+        </v:while>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="while-loop-max-loop-count">
+        <v:log />
+        <v:while test="1==1" maxLoopCount="2">
+            <v:log />
+            <v:log />
+            <v:log />
+        </v:while>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="while-ref">
+        <v:log />
+        <v:while test="loopCount&lt;2" pipeline-ref="p2" />
+        <v:log />
+    </services:pipeline>
+
+    <!-- ===================== -->
+    <!-- break-if valve        -->
+    <!-- ===================== -->
+    <services:pipeline id="break-if-simple">
+        <v:log />
+        <v:loop label="level2">
+            <v:log />
+            <v:break-if test="loopCount == 2" />
+            <v:log />
+        </v:loop>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="break-if-levels">
+        <v:log />
+        <v:loop>
+            <v:log />
+            <v:break-if test="loopCount == 2" levels="1" />
+            <v:log />
+        </v:loop>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="break-if-tolabel">
+        <v:log />
+        <v:loop label="level2">
+            <v:log />
+            <v:break-if toLabel="level2">
+                <c:jexl-condition expr="loopCount==1" />
+            </v:break-if>
+            <v:log />
+        </v:loop>
+        <v:log />
+    </services:pipeline>
+
+    <!-- ===================== -->
+    <!-- break-unless valve    -->
+    <!-- ===================== -->
+    <services:pipeline id="break-unless-simple">
+        <v:log />
+        <v:loop label="level2">
+            <v:log />
+            <v:break-unless test="loopCount &lt; 2" />
+            <v:log />
+        </v:loop>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="break-unless-levels">
+        <v:log />
+        <v:loop>
+            <v:log />
+            <v:break-unless test="loopCount &lt; 2" levels="1" />
+            <v:log />
+        </v:loop>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="break-unless-tolabel">
+        <v:log />
+        <v:loop label="level2">
+            <v:log />
+            <v:break-unless toLabel="level2">
+                <c:jexl-condition expr="loopCount &lt; 1" />
+            </v:break-unless>
+            <v:log />
+        </v:loop>
+        <v:log />
+    </services:pipeline>
+
+    <!-- ===================== -->
+    <!-- try-catch-finally     -->
+    <!-- ===================== -->
+    <services:pipeline id="tcf-empty">
+        <v:log />
+        <v:try-catch-finally />
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="tcf-try">
+        <v:log />
+        <v:try-catch-finally>
+            <try>
+                <v:log />
+                <v:valve class="com.alibaba.citrus.service.pipeline.valve.WrongValve" />
+                <v:log />
+            </try>
+        </v:try-catch-finally>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="tcf-try-catch">
+        <v:log />
+        <v:try-catch-finally>
+            <try>
+                <v:log />
+                <v:valve class="com.alibaba.citrus.service.pipeline.valve.WrongValve" />
+                <v:log />
+            </try>
+            <catch>
+                <v:log />
+                <v:valve class="com.alibaba.citrus.service.pipeline.valve.RecoveryValve" />
+                <v:log />
+            </catch>
+        </v:try-catch-finally>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="tcf-try-catch-finally">
+        <v:log />
+        <v:try-catch-finally label="tcf">
+            <try>
+                <v:log />
+                <v:valve class="com.alibaba.citrus.service.pipeline.valve.WrongValve" />
+                <v:log />
+            </try>
+            <catch exceptionName="myexception">
+                <v:log />
+                <v:valve class="com.alibaba.citrus.service.pipeline.valve.RecoveryValve" p:name="myexception" />
+                <v:log />
+            </catch>
+            <finally>
+                <v:log />
+                <v:break toLabel="tcf" />
+                <v:log />
+            </finally>
+        </v:try-catch-finally>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="tcf-broken-try" label="top">
+        <v:log />
+        <v:try-catch-finally label="tcf">
+            <try>
+                <v:log />
+                <v:break toLabel="top" />
+                <v:log />
+            </try>
+            <finally>
+                <v:log />
+                <v:log />
+            </finally>
+        </v:try-catch-finally>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="tcf-ref">
+        <v:log />
+        <v:try-catch-finally>
+            <try pipeline-ref="p_wrong" />
+            <catch pipeline-ref="p1" />
+            <finally pipeline-ref="p3" />
+        </v:try-catch-finally>
+        <v:log />
+    </services:pipeline>
+
+    <!-- ===================== -->
+    <!-- if valve              -->
+    <!-- ===================== -->
+    <services:pipeline id="if-empty">
+        <v:log />
+        <v:if test="1==2" />
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="if-satisfied">
+        <v:log />
+        <v:if test="1==1">
+            <v:log />
+            <v:log />
+            <v:log />
+        </v:if>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="if-not-satisfied">
+        <v:log />
+        <v:if test="1==2">
+            <v:log />
+            <v:log />
+            <v:log />
+        </v:if>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="if-condition-label">
+        <v:log />
+        <v:if test="1==1" label="if-block1">
+            <v:loop label="loop1">
+                <v:log />
+                <v:if label="if-block2">
+                    <c:jexl-condition expr="loopCount == 2" />
+                    <v:break toLabel="if-block1" />
+                </v:if>
+                <v:log />
+            </v:loop>
+        </v:if>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="if-ref">
+        <v:log />
+        <v:if test="value==1" pipeline-ref="p1" />
+        <v:log />
+    </services:pipeline>
+
+    <!-- ===================== -->
+    <!-- choose valve          -->
+    <!-- ===================== -->
+    <services:pipeline id="choose-empty">
+        <v:log />
+        <v:choose />
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="choose-otherwise-only">
+        <v:log />
+        <v:choose>
+            <otherwise>
+                <v:log />
+            </otherwise>
+        </v:choose>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="choose-when-satisfied">
+        <v:log />
+        <v:choose label="chooseLabel">
+            <when test="1==2">
+                <v:log />
+                <v:log />
+            </when>
+            <when>
+                <c:jexl-condition expr="2!=3" />
+                <v:log />
+                <v:break toLabel="chooseLabel" />
+                <v:log />
+            </when>
+            <otherwise>
+                <v:log />
+            </otherwise>
+        </v:choose>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="choose-when-not-satisfied">
+        <v:log />
+        <v:choose label="chooseLabel">
+            <when test="1==2">
+                <v:log />
+                <v:log />
+            </when>
+            <when>
+                <c:jexl-condition expr="2==3" />
+                <v:log />
+                <v:log />
+                <v:log />
+            </when>
+            <otherwise>
+                <v:log />
+                <v:log />
+                <v:break toLabel="chooseLabel" />
+            </otherwise>
+        </v:choose>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="choose-ref">
+        <v:log />
+        <v:choose>
+            <when test="value==1" pipeline-ref="p1" />
+            <when test="value==2" pipeline-ref="p2" />
+            <otherwise pipeline-ref="p3" />
+        </v:choose>
+        <v:log />
+    </services:pipeline>
+
+    <!-- ===================== -->
+    <!-- sub-pipeline valve    -->
+    <!-- ===================== -->
+    <services:pipeline id="sub-pipeline-empty">
+        <v:log />
+        <v:sub-pipeline />
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="sub-pipelines">
+        <v:log />
+        <v:sub-pipeline label="label1">
+            <v:log />
+            <v:sub-pipeline>
+                <v:log />
+                <v:break toLabel="label1" />
+                <v:log />
+            </v:sub-pipeline>
+            <v:log />
+        </v:sub-pipeline>
+        <v:log />
+    </services:pipeline>
+
+    <services:pipeline id="sub-pipeline-ref">
+        <v:log />
+        <v:sub-pipeline ref="p1" />
+        <v:log />
+    </services:pipeline>
+
+</beans:beans>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:p="http://www.springframework.org/schema/p"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:mapping-rules="http://www.alibaba.com/schema/services/mapping-rules"
+             xmlns:factories="http://www.alibaba.com/schema/services/module-loader/factories"
+             xmlns:engines="http://www.alibaba.com/schema/services/template/engines"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/mapping-rules http://localhost:8080/schema/services-mapping-rules.xsd
+                 http://www.alibaba.com/schema/services/module-loader/factories http://localhost:8080/schema/services-module-loader-factories.xsd
+                 http://www.alibaba.com/schema/services/template/engines http://localhost:8080/schema/services-template-engines.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <services:property-placeholder />
+
+    <services:simple-configuration>
+        <productionMode>${productionMode:true}</productionMode>
+    </services:simple-configuration>
+
+    <!-- 装载module -->
+    <services:module-loader>
+        <factories:class-modules>
+            <search-packages type="$1" packages="com.alibaba.app1.module.*" />
+        </factories:class-modules>
+    </services:module-loader>
+
+    <!-- 装载template -->
+    <services:template searchExtensions="true" searchLocalizedTemplates="true">
+        <engines:template-engine id="myEngine1"
+                                 class="com.alibaba.citrus.service.mappingrule.impl.SimpleEngine"
+                                 p:extensions="vm" />
+        <engines:template-engine id="myEngine2"
+                                 class="com.alibaba.citrus.service.mappingrule.impl.SimpleEngine"
+                                 p:extensions="jsp" />
+    </services:template>
+
+    <!-- 配置mapping -->
+    <services:mapping-rules>
+        <!-- 直接从name映射成class name -->
+        <mapping-rules:direct-module-rule id="direct.module" />
+
+        <!-- 直接从name映射成template name -->
+        <mapping-rules:direct-template-rule id="direct.template" templatePrefix="myprefix" />
+
+        <!-- 回归搜索模块名  -->
+        <mapping-rules:fallback-module-rule id="fallback.module" moduleType="screen" defaultName="MyDefaultModule" />
+        <mapping-rules:fallback-module-rule id="fallback.module.nodefault" moduleType="screen" />
+
+        <!-- 回归搜索模板名 -->
+        <mapping-rules:fallback-template-rule id="fallback.template" templatePrefix="myprefix" matchLastName="false" />
+        <mapping-rules:fallback-template-rule id="fallback.template.searchExts" templatePrefix="myprefix" />
+        <mapping-rules:fallback-template-rule id="fallback.template.searchExts.local"
+                                              templatePrefix="myprefix.locale" />
+
+        <!-- 后缀扩展映射 -->
+        <mapping-rules:extension-rule id="extension">
+            <mapping extension="" to="jsp" />
+            <mapping extension="php" to="jsp" />
+            <mapping extension="jhtml" to="jsp" />
+            <mapping extension="vhtml" to="vm" />
+            <mapping extension="noext" to="" />
+        </mapping-rules:extension-rule>
+        <mapping-rules:extension-rule id="extension.nodef">
+            <mapping extension="php" to="jsp" />
+            <mapping extension="jhtml" to="jsp" />
+            <mapping extension="vhtml" to="vm" />
+            <mapping extension="noext" to="" />
+        </mapping-rules:extension-rule>
+        <mapping-rules:extension-rule id="extension.input">
+            <mapping extension="" to="jsp" />
+            <mapping extension="jhtml" to="jsp" />
+            <mapping extension="jsp" to="jsp" />
+            <mapping extension="vhtml" to="vm" />
+            <mapping extension="vm" to="vm" />
+        </mapping-rules:extension-rule>
+        <mapping-rules:extension-rule id="extension.output">
+            <mapping extension="" to="jhtml" />
+            <mapping extension="jhtml" to="jhtml" />
+            <mapping extension="jsp" to="jhtml" />
+            <mapping extension="vhtml" to="vhtml" />
+            <mapping extension="vm" to="vhtml" />
+        </mapping-rules:extension-rule>
+    </services:mapping-rules>
+
+    <!-- 空的配置，用于测试异常操作 -->
+    <services:mapping-rules id="nullMapping" />
+
+    <services:mapping-rules id="extension1" />
+
+    <services:mapping-rules id="extension2" />
+
+    <services:mapping-rules id="extension3" parentRef="extension1" />
+
+    <!-- 用于测试cacheEnabled和productionMode -->
+    <services:mapping-rules id="cache">
+        <mapping-rules:direct-module-rule id="direct.module" cacheEnabled="${cacheEnabled:false}" />
+
+        <mapping-rules:direct-template-rule id="direct.template"
+                                            cacheEnabled="${cacheEnabled:false}"
+                                            templatePrefix="myprefix" />
+
+        <mapping-rules:fallback-module-rule id="fallback.module"
+                                            cacheEnabled="${cacheEnabled:false}"
+                                            moduleType="screen"
+                                            moduleLoaderServiceRef="moduleLoaderService" />
+
+        <mapping-rules:fallback-template-rule id="fallback.template"
+                                              cacheEnabled="${cacheEnabled:false}"
+                                              templatePrefix="myprefix"
+                                              templateServiceRef="templateService" />
+
+        <mapping-rules:extension-rule id="extension" cacheEnabled="${cacheEnabled:false}">
+            <mapping extension="" to="jsp" />
+            <mapping extension="jhtml" to="jsp" />
+            <mapping extension="jsp" to="jsp" />
+            <mapping extension="vhtml" to="vm" />
+            <mapping extension="vm" to="vm" />
+        </mapping-rules:extension-rule>
+    </services:mapping-rules>
+
+</beans:beans>

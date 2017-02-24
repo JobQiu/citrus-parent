@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:mapping-rules="http://www.alibaba.com/schema/services/mapping-rules"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/mapping-rules http://localhost:8080/schema/services-mapping-rules.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <services:mapping-rules>
+        <mapping-rules:extension-rule id="extension0">
+            <mapping extension="" to="ext0" />
+        </mapping-rules:extension-rule>
+    </services:mapping-rules>
+
+    <services:mapping-rules id="extension1">
+        <mapping-rules:extension-rule id="extension1">
+            <mapping extension="" to="ext1" />
+        </mapping-rules:extension-rule>
+    </services:mapping-rules>
+
+    <services:mapping-rules id="extension3">
+        <mapping-rules:extension-rule id="extension3">
+            <mapping extension="" to="ext3" />
+        </mapping-rules:extension-rule>
+    </services:mapping-rules>
+
+</beans:beans>

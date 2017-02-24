@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:dr-factories="http://www.alibaba.com/schema/services/data-resolver/factories"
+             xmlns:mapping-rules="http://www.alibaba.com/schema/services/mapping-rules"
+             xmlns:factories="http://www.alibaba.com/schema/services/module-loader/factories"
+             xmlns:valves="http://www.alibaba.com/schema/services/pipeline/valves"
+             xmlns:pull-tools="http://www.alibaba.com/schema/services/pull/factories"
+             xmlns:engines="http://www.alibaba.com/schema/services/template/engines"
+             xmlns:c="http://www.alibaba.com/schema/services/pipeline/conditions"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/data-resolver/factories http://localhost:8080/schema/services-data-resolver-factories.xsd
+                 http://www.alibaba.com/schema/services/mapping-rules http://localhost:8080/schema/services-mapping-rules.xsd
+                 http://www.alibaba.com/schema/services/module-loader/factories http://localhost:8080/schema/services-module-loader-factories.xsd
+                 http://www.alibaba.com/schema/services/pipeline/valves http://localhost:8080/schema/services-pipeline-valves.xsd
+                 http://www.alibaba.com/schema/services/pull/factories http://localhost:8080/schema/services-pull-factories.xsd
+                 http://www.alibaba.com/schema/services/template/engines http://localhost:8080/schema/services-template-engines.xsd
+                 http://www.alibaba.com/schema/services/pipeline/conditions http://localhost:8080/schema/services-pipeline-conditions.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <services:webx-configuration />
+
+    <services:pipeline id="pathCondition">
+        <valves:if>
+            <c:path-condition name="/hello(\w+)" var="v1" />
+            <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.PathConditionTests$MyClass" />
+        </valves:if>
+        <valves:if>
+            <c:path-condition name="!/hello(\w+)" var="v2" />
+            <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.PathConditionTests$MyClass" />
+        </valves:if>
+    </services:pipeline>
+
+    <services:pipeline id="targetCondition">
+        <valves:analyzeURL />
+        <valves:if>
+            <c:target-condition name="^/hello(\w+)" var="v1" />
+            <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.TargetConditionTests$MyClass" />
+        </valves:if>
+        <valves:if>
+            <c:target-condition name="^/(.+)/hello(\w+)" var="v2" withComponentName="true" />
+            <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.TargetConditionTests$MyClass" />
+        </valves:if>
+        <valves:if>
+            <c:target-condition name="!^/hello(\w+)" var="v3" />
+            <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.TargetConditionTests$MyClass" />
+        </valves:if>
+    </services:pipeline>
+
+    <services:pipeline id="analyzeURL">
+        <valves:analyzeURL />
+    </services:pipeline>
+
+    <services:pipeline id="checkCsrfToken">
+        <valves:checkCsrfToken expiredPage="error.vm" tokenKey="token" maxTokens="1" logName="mySecurity" />
+    </services:pipeline>
+
+    <services:pipeline id="checkCsrfToken_manually">
+        <valves:checkCsrfToken expiredPage="error.vm" tokenKey="token" maxTokens="1" logName="mySecurity" />
+        <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.CheckCsrfTokenValveTests$CheckCsrfManually" />
+    </services:pipeline>
+
+    <services:pipeline id="setBuffering_default">
+        <valves:setBuffering />
+    </services:pipeline>
+
+    <services:pipeline id="setBuffering_enabled">
+        <valves:setBuffering enabled="true" />
+    </services:pipeline>
+
+    <services:pipeline id="setBuffering_disabled">
+        <valves:setBuffering enabled="false" />
+        <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.SetBufferingValveTests.MyValve" />
+    </services:pipeline>
+
+    <services:pipeline id="performActionValveTests">
+        <valves:analyzeURL actionParam="action" />
+        <valves:performAction />
+    </services:pipeline>
+
+    <services:pipeline id="performTemplateScreenValveTests">
+        <valves:analyzeURL />
+        <valves:performTemplateScreen />
+    </services:pipeline>
+
+    <services:pipeline id="performScreenValveTests">
+        <valves:analyzeURL />
+        <valves:performScreen />
+    </services:pipeline>
+
+    <services:pipeline id="performScreenValveTests2">
+        <valves:analyzeURL />
+        <valves:performScreen output="myresult" />
+        <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.PerformScreenValveTests$ReadResultValve" />
+    </services:pipeline>
+
+    <services:pipeline id="renderJson" lazy-init="true">
+        <valves:analyzeURL />
+        <valves:performScreen />
+        <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.RenderResultAsJsonValveTests$ResultCheck" />
+        <valves:renderResultAsJson />
+        <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.RenderResultAsJsonValveTests$ResultCheck" />
+    </services:pipeline>
+
+    <services:pipeline id="renderJsonAsJs" lazy-init="true">
+        <valves:analyzeURL />
+        <valves:performScreen />
+        <valves:renderResultAsJson javascriptVariable="myresult" />
+    </services:pipeline>
+
+    <services:pipeline id="renderJson_specifiedContentType" lazy-init="true">
+        <valves:analyzeURL />
+        <valves:performScreen />
+        <valves:renderResultAsJson contentType="text/plain" />
+    </services:pipeline>
+
+    <services:pipeline id="renderJsonAsJs_specifiedContentType" lazy-init="true">
+        <valves:analyzeURL />
+        <valves:performScreen output="myresult" />
+        <valves:renderResultAsJson input="myresult" javascriptContentType="text/js" javascriptVariable="myresult" />
+    </services:pipeline>
+
+    <services:pipeline id="renderTemplate">
+        <valves:analyzeURL />
+        <valves:renderTemplate />
+    </services:pipeline>
+
+    <services:pipeline id="prepareForTurbine1">
+        <valves:prepareForTurbine />
+        <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.PrepareForTurbineValveTests$MyErrorValve" />
+    </services:pipeline>
+
+    <services:pipeline id="prepareForTurbine2">
+        <valves:prepareForTurbine />
+        <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.PrepareForTurbineValveTests$MyValve" />
+    </services:pipeline>
+
+    <services:pipeline id="requestHandler">
+        <valves:requestHandler class="com.alibaba.citrus.turbine.pipeline.valve.MySpringHandler" />
+    </services:pipeline>
+
+    <services:pipeline id="handleException_noDefaultPage" lazy-init="true">
+        <valves:handleException defaultPage="" />
+    </services:pipeline>
+
+    <services:pipeline id="handleException_helperName" lazy-init="true">
+        <valves:handleException defaultPage="error.vm" helperName="error1" />
+    </services:pipeline>
+
+    <services:pipeline id="handleException" lazy-init="true">
+        <valves:handleException defaultPage="error.vm">
+            <on-exception type="java.lang.Exception" page="error_exception.vm" statusCode="501" />
+            <on-exception type="java.lang.RuntimeException" page="error_runtime_exception.vm" statusCode="502" />
+            <on-exception type="java.io.IOException" page="error_io_exception.vm" statusCode="503" />
+            <on-exception type="java.lang.IllegalArgumentException" page="error_illegal_argument_exception.vm" />
+        </valves:handleException>
+    </services:pipeline>
+
+    <services:pipeline id="handleException_logging" lazy-init="true">
+        <valves:handleException defaultPage="error.vm" defaultLogging="brief" defaultLoggerName="my.logger">
+            <on-exception type="java.io.IOException" logging="detailed" />
+            <on-exception type="java.lang.IllegalArgumentException" loggerName="my.logger2" />
+        </valves:handleException>
+    </services:pipeline>
+
+    <services:pipeline id="pageAuthValve" lazy-init="true">
+        <valves:analyzeURL />
+        <valves:pageAuthorization callbackClass="com.alibaba.citrus.turbine.pipeline.valve.PageAuthorizationValveTests$MyCallback" />
+        <valves:valve class="com.alibaba.citrus.turbine.pipeline.valve.PageAuthorizationValveTests$MyValve" />
+    </services:pipeline>
+
+    <services:module-loader id="moduleLoaderService">
+        <factories:class-modules>
+            <search-classes type="$1" name="$2" classes="com.alibaba.test.app1.module.*.**" />
+            <search-classes type="$1" name="$2" classes="com.alibaba.test.module.*.**" />
+        </factories:class-modules>
+
+        <factories:script-modules>
+            <search-files type="$1" name="$2" files="classpath:app1/module/*/**" />
+        </factories:script-modules>
+    </services:module-loader>
+
+    <!-- 装载template,用于searchExtensions和local测试 -->
+    <services:template searchExtensions="true">
+        <engines:velocity-engine strictReference="false" />
+    </services:template>
+
+    <services:pull>
+        <pull-tools:constants constantClass="javax.servlet.http.HttpServletResponse" />
+        <pull-tools:utils />
+        <pull-tools:csrfToken />
+        <pull-tools:control-tool />
+        <pull-tools:control-tool id="controlExportAll" exportAll="true" />
+        <pull-tools:page-tool />
+        <pull-tools:rundata-tool />
+    </services:pull>
+
+    <!-- 配置mapping -->
+    <services:mapping-rules>
+        <!-- 直接从name映射成class name -->
+        <mapping-rules:direct-module-rule id="direct.module" />
+
+        <!-- 直接从name映射成template name -->
+        <mapping-rules:direct-template-rule id="direct.template" templatePrefix="myscreen" />
+
+        <!-- 回归搜索模块名  -->
+        <mapping-rules:fallback-module-rule id="action" moduleType="action" defaultName="MyDefaultModule" />
+
+        <mapping-rules:fallback-module-rule id="screen" moduleType="screen" defaultName="MyDefaultModule" />
+
+        <mapping-rules:fallback-module-rule id="control" moduleType="control" defaultName="MyDefaultModule" />
+
+        <mapping-rules:fallback-module-rule id="screen.notemplate" moduleType="screen" />
+
+        <mapping-rules:fallback-module-rule id="control.notemplate" moduleType="control" />
+
+        <mapping-rules:fallback-template-rule id="layout.template" templatePrefix="mylayout" />
+
+        <mapping-rules:fallback-template-rule id="screen.template" templatePrefix="myscreen" />
+
+        <mapping-rules:fallback-template-rule id="control.template" templatePrefix="control" />
+
+        <mapping-rules:fallback-template-rule id="error.template" templatePrefix="myscreen/error" />
+
+        <!-- 后缀扩展映射 -->
+        <mapping-rules:extension-rule id="extension.input">
+            <mapping extension="" to="jsp" />
+            <mapping extension="php" to="jsp" />
+            <mapping extension="jhtml" to="jsp" />
+            <mapping extension="vhtml" to="vm" />
+            <mapping extension="do" to="do" />
+        </mapping-rules:extension-rule>
+    </services:mapping-rules>
+
+    <!-- 支持注入参数。 -->
+    <services:data-resolver>
+        <dr-factories:turbine-rundata-resolver />
+    </services:data-resolver>
+
+    <!-- 页面验证 -->
+    <services:page-authorization>
+        <match target="/aaa">
+            <grant user="baobao">
+                <allow>*</allow>
+            </grant>
+            <grant role="admin">
+                <allow>*</allow>
+            </grant>
+        </match>
+        <match target="/bbb">
+            <grant user="*, anonymous">
+                <allow>screen</allow>
+                <allow>action.bbb.*</allow>
+            </grant>
+        </match>
+        <match target="/ccc">
+            <grant user="*, anonymous">
+                <allow>action.ccc.*</allow>
+            </grant>
+        </match>
+        <match target="/ddd">
+            <grant user="*, anonymous">
+                <allow>screen</allow>
+                <allow>action.ddd.*.doMyEvent</allow>
+            </grant>
+        </match>
+    </services:page-authorization>
+</beans:beans>

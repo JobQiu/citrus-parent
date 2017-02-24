@@ -1,0 +1,16 @@
+## --------------------------
+## 页头
+##
+#@ charset    UTF-8
+#@ trimming   on
+#@ whitespace collapse
+## --------------------------
+${headComponents: #css, #js}
+
+#css
+  <link href="${componentResource}" rel="stylesheet" type="text/css" />
+#end
+#js
+  <script src="${componentResource}" type="text/javascript">
+  </script>
+#end

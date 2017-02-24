@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:mapping-rules="http://www.alibaba.com/schema/services/mapping-rules"
+             xmlns:factories="http://www.alibaba.com/schema/services/module-loader/factories"
+             xmlns:engines="http://www.alibaba.com/schema/services/template/engines"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/mapping-rules http://localhost:8080/schema/services-mapping-rules.xsd
+                 http://www.alibaba.com/schema/services/module-loader/factories http://localhost:8080/schema/services-module-loader-factories.xsd
+                 http://www.alibaba.com/schema/services/template/engines http://localhost:8080/schema/services-template-engines.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <services:webx-configuration />
+
+    <services:module-loader id="moduleLoaderService">
+        <factories:class-modules>
+            <search-packages type="$1" packages="com.alibaba.test.app2.module.*" />
+        </factories:class-modules>
+    </services:module-loader>
+
+    <!-- 装载template,用于searchExtensions和local测试 -->
+    <services:template searchExtensions="true">
+        <engines:velocity-engine path="/templates/app2" strictReference="false" />
+    </services:template>
+
+    <!-- 配置mapping -->
+    <services:mapping-rules>
+        <mapping-rules:fallback-module-rule id="control" moduleType="control" />
+        <mapping-rules:fallback-module-rule id="control.notemplate" moduleType="control" />
+        <mapping-rules:fallback-template-rule id="control.template" templatePrefix="control" />
+    </services:mapping-rules>
+
+</beans:beans>

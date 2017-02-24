@@ -1,0 +1,164 @@
+-- Changes in 3.1.0
+* 升级到spring 3.1.1
+
+* 修改代码，使之和spring 3.1.x兼容
+  + com.alibaba.citrus.springext.support.resolver.XmlBeanDefinitionReaderProcessor
+  + com.alibaba.citrus.test.context.SpringextContextLoader
+  + com.alibaba.citrus.service.resource.SpringIntegrationTests：反映Resource.getFilename()的改变
+
+* 增加检测代码，以防止webx3.1.x和spring 3.1.1之前的版本一起使用。
+
+-- Changes in 3.1.1
+
+* 升级依赖的jar包：
+
+  slf4j 1.6.6
+  logback 1.0.6
+  log4j 1.2.17
+  junit 4.10
+  rhino-js 1.7R2
+  nekohtml 1.9.6.2
+  xerces 2.10.0
+  easymock 3.1
+  jasper 6.0.35
+  jexl 2.1.1
+  velocity 1.7
+  freemarker 2.3.19
+  commons-fileupload 1.2.2
+  commons-io 2.3
+  commons-codec 1.6
+  groovy 1.8.6
+  cglib 2.2.2
+  xml-apis 1.4.01
+
+* Bugfix: WebxFrameworkFilter中的excludes/passthru参数、SetLocaleRequestContext的overrider中，错误地使用了requestURI。
+  正确的方式应该是requestURI除去contextPath，因为应用配置不应该依赖于contextPath。
+
+  ！！注意：现有的web应用如果不是默认web应用（即contextPath非空），并且web.xml中对WebxFrameworkFilter配置了excludes/passthru参数的，
+  必须修改参数，使之不包含contextPath。
+
+* 改进：WebxFrameworkFilter中的excludes/passthru参数，如果pattern以!开始，代表排除。
+  例如：excludes=*.jpg, !/upload/*.jpg，意味着除了/upload目录下的以外，所有的jpg图片都将从servlet容器中装载，而不是从webx框架中装载。
+
+* 改进：由于freemarker升级以后已经支持slf4j，所以删除FreemarkerEngine中的Slf4jLoggerFactory，以及不太稳定的LoggerHack类。
+
+* Bugfix: 移植的hessian无法运行于resin服务器。
+
+* 添加一种新的module adapter: <screen-event-adapter />，从而支持如下情形：
+  当target=/xxx/yyy/zzz.htm时，调用screen.xxx.Yyy中的doZzz()方法。
+  原来的方式仍然支持。
+
+* 为form-tool添加参数，使之可以指定formService的实例：<form-tool formServiceRef="xxx" />
+
+* 改进<performScreen>以及screen module，使screen可以返回一个值给pipeline。此举是为了简化screen创建json的请求。
+  添加了一个可选的配置参数：<performScreen resultName="screenResult" />，若不配置该参数，则"screenResult"就是默认值。
+  当screen.execute()或screen.doEvent()返回一个值的时候，这个值被记录在pipelineContext中，
+  其它valve可以通过pipelineContext.getAttribute("screenResult")来取得该值。
+
+* Bugfix: 对于ClassNameWildcard和PathNameWildcard，当pattern以?开头或结束的时候，错误地匹配了多个字符（?的意思是有且仅有一个字符）
+
+* 新增<renderResultAsJson /> valve，用来将screen所返回的对象转换成json并输出到response。
+
+
+-- Changes in 3.1.2
+
+* Bugfix: 多值field中存在null空值的时候，<all-of-values>验证器不能正确取得null值，导致验证结果错误。
+* 升级servlet api到3.0.1。
+  * 添加动态生成类的工具InterfaceImplementorBuilder，用来解决如下问题：
+    有些测试代码需要实现ServletContext接口，但是由于servlet3和2版本对于该接口的API不同，导致无法用一套代码同时兼容servlet3和2。用动态生成类工具就可以解决这个问题。
+  * 在开发模式页面中显示Servlet版本号。
+* 改进request context服务，使之在async模式被启动时，不会提交response。当async线程重新取得控制时，可以重新取得原来的request context。
+* 改进<renderTemplate> valve，当buffering关闭时，只不过不显示layout，而不会报错。
+* 添加<setBuffering enabled="true|false" /> valve，可以在pipeline中开关buffering，以简化screen代码。
+* 添加异步执行功能，以下为pipeline片段：
+  <performScreen/>
+  <performRunnableAsync>
+      <setLoggingContext />
+      <doPerformRunnable />
+  </performRunnableAsync>
+  当screen返回runnable或callable对象时，就会启动异步操作。runnable或callable将在另一个线程中被执行。
+
+* 修改了参数名称，使含义更明确：
+  <performScreen output="result" />
+  <renderResultAsJson input="result" />
+
+* 为RequestContext增加了commitHeaders功能，这样，当buffering关掉时，确保headers能正常输出到浏览器。
+  * 新增了TwoPhaseCommitRequestContext接口，如有request context希望在headers提交时被调用，可从此接口派生。
+  * 改进如下RequestContext实现，使之从TwoPhaseCommitRequestContext派生：
+    * BasicRequestContext
+    * LazyCommitRequestContext
+    * SessionRequestContext
+  * 修改了RequestContextLifecycleInterceptor接口，添加了commitHeaders()方法。如有应用实现了这个接口，需要更改代码并重新编译。
+  * 改进了CookieStore，确保cookie能在response被提交前写入。
+
+* 改进schema exporter servlet（由mvn springext:run来运行），
+  当访问http://localhost:8080/时，自动重定向到http://localhost:8080/schema，以方便开发者。
+
+* 改进Springext以配合IDEA/Eclipse plugins。
+  * 调整接口，使之不仅可从ClassLoader中装载资源，也可从由IDE plugins所实现的ResourceResolver接口来装载。
+  * 改进了装载schema的过程，引进Transformer接口，不仅使代码更清晰，也提高了效率。
+  * 增加方法：ConfigurationPoint.getDependingContributions()，可以取得所有引用此configuration point的contributions。
+  * 从SpringExtSchemaSet中可以取得configuration point之间的依赖关系树。
+  * 为ConfigurationPoint/Contribution/Schema/SpringPluggableSchema 增添了SourceInfo接口，以便取得原始资源文件，供IDE来编译。
+  * 为Contribution添加了getAnnotation()方法，可以取得schema中的文档信息。
+  * 支持读取和取得 META-INF/spring.handlers 和 META-INF/spring.tooling 信息。
+
+* Bugfix: Form验证中，<uploaded-file-validator extension="jpg,gif" />不能验证JPG/GIF大写后缀。
+* Bugfix：当response.reset()时，LazyCommitRequestContext应清除所有的状态。
+* Bugfix: <renderResultAsJson> valve，当redirect发生时，仍然执行渲染的问题。
+
+* 改进Navigator接口，添加了forwardTo(target, action, actionEvent)方法，使之可内部重定向到指定action。
+* Bugfix: 当requestContext初始化失败时，错误处理程序报NPE的问题。
+* 升级Spring到3.1.2
+* 升级到springext-maven-plugin:1.1
+* 改进：pipeline-conditions: <path-condition>和<target-condition>支持反向pattern：如果以name="!xxx"，则表示不匹配xxx。
+* 改进：pipeline-conditions: <target-condition>添加参数：withComponentName="true"，此时将会以/componentName/target的组合路径来进行匹配。
+
+-- Changes in 3.1.3
+
+* 升级到springext-maven-plugin 1.2
+* 删除intellij:annotations依赖，因为还不能全面使用这个机制，不如先删除。
+* 将velocity/freemarker的依赖改成scope=provided。应用程序如果需要的话，必须明确声明依赖它们。
+* 当SLF4J没有绑定日志系统时（即classpath中不存在诸如logback-classic或slf4j-log4j12包），避免配置出错。
+  这个修改可使autoconfig运行于maven 3.1.x中。因为在maven 3.1.x里，SLF4J被提到上层classloader中，从而找不到logback包而报错。
+* Bugfix: 修正如下问题：在<resource-loading>服务中，两个连续的<super-loader>中的第二个无法工作，例如：
+  <resource pattern="/*/templates/layout">
+      <res-loaders:super-loader name="/webroot/$1/templates/layout" />
+      <res-loaders:super-loader name="/webroot/common/templates/layout" />
+  </resource>
+* Bugfix: 修正当request.startAsync以后，每个请求都会生成cglib类，从而导致permgen溢出的问题。
+* 升级依赖包的版本：
+      spring                3.1.2   -> 3.2.4
+      slf4j                 1.6.6   -> 1.7.5
+      commons-fileupload    1.2.2   -> 1.3
+      commons-io            2.3     -> 2.4
+      commons-codec         1.6     -> 1.8
+      fastjson              1.1.23  -> 1.1.36
+      logback               1.0.6   -> 1.0.13   [provided]
+      commons-logging       1.1.1   -> 1.1.3    [provided]
+      servlet               3.0.1   -> 3.1.0    [provided]
+      javamail              1.4.1   -> 1.4.7    [provided]
+      activation            1.1     -> 1.1.1    [provided]
+      freemarker            2.3.19  -> 2.3.20   [provided]
+      groovy                1.8.6   -> 2.1.7    [runtime]
+      httpunit              1.7     -> 1.7.2    [test]
+      xerces                2.10.0  -> 2.11.0   [test]
+      easymock              3.1     -> 3.2      [test]
+      jasper                6.0.35  -> 6.0.37   [test]
+      mock-javamail         1.7     -> 1.9      [test]
+
+-- Changes in 3.1.4
+
+* Bugfix: 在servlet2.5环境中，Servlet3Util初始化失败。
+
+-- Changes in 3.1.5
+
+* Bugfix: MatchResultSubstitution，当出现很长的变量$xxxxxxxx...时，发生溢出错误，导致<rewrite>功能出错。
+* Bugfix: 在<rewrite><condition test="%{VAR}">中，避免%{VAR}中出现的$或%被解析。
+* 改进：使EntityResolver支持../xxx/yyy.xsd这样的相对路径。Apache CXF用到了这样的URL，此改进确保CXF可以在webx平台上运行。
+
+-- Changes in 3.1.6
+
+* 升级commons-fileupload，避免DOS攻击的问题。
+  参见：http://mail-archives.apache.org/mod_mbox/www-announce/201402.mbox/%3C52F373FC.9030907@apache.org%3E
+* 修正SessionStore.invalidate()方法的拼写错误，然而请注意，这会导致新版本和老版本的不兼容。

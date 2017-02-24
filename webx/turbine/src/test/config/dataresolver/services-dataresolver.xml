@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:services="http://www.alibaba.com/schema/services"
+             xmlns:dr-factories="http://www.alibaba.com/schema/services/data-resolver/factories"
+             xmlns:fm-validators="http://www.alibaba.com/schema/services/form/validators"
+             xmlns:ml-factories="http://www.alibaba.com/schema/services/module-loader/factories"
+             xmlns:request-contexts="http://www.alibaba.com/schema/services/request-contexts"
+             xsi:schemaLocation="
+                 http://www.alibaba.com/schema/services http://localhost:8080/schema/services.xsd
+                 http://www.alibaba.com/schema/services/data-resolver/factories http://localhost:8080/schema/services-data-resolver-factories.xsd
+                 http://www.alibaba.com/schema/services/form/validators http://localhost:8080/schema/services-form-validators.xsd
+                 http://www.alibaba.com/schema/services/module-loader/factories http://localhost:8080/schema/services-module-loader-factories.xsd
+                 http://www.alibaba.com/schema/services/request-contexts http://localhost:8080/schema/services-request-contexts.xsd
+                 http://www.springframework.org/schema/beans http://localhost:8080/schema/www.springframework.org/schema/beans/spring-beans.xsd
+             ">
+
+    <services:property-placeholder />
+
+    <services:request-contexts>
+        <request-contexts:rundata />
+        <request-contexts:parser useServletEngineParser="true" converterQuiet="false">
+            <property-editor-registrar class="com.alibaba.citrus.turbine.dataresolver.ParameterResolverTests$MyRegistrar" />
+        </request-contexts:parser>
+    </services:request-contexts>
+
+    <services:upload />
+
+    <services:simple-configuration />
+
+    <services:module-loader>
+        <ml-factories:class-modules>
+            <search-packages type="$1" packages="com.alibaba.test2.module.*" />
+        </ml-factories:class-modules>
+    </services:module-loader>
+
+    <services:data-resolver>
+        <dr-factories:turbine-rundata-resolver />
+        <dr-factories:parameter-resolver />
+        <dr-factories:form-resolver />
+    </services:data-resolver>
+
+    <services:form postOnlyByDefault="false" converterQuiet="${convertQuiet:true}">
+        <group name="myGroup1">
+            <field name="custom">
+                <fm-validators:custom-error id="error1" message="error1" />
+            </field>
+            <field name="field1">
+                <fm-validators:required-validator message="required ${displayName}" />
+            </field>
+            <field name="field2">
+                <fm-validators:required-validator message="required ${displayName}" />
+            </field>
+        </group>
+        <group name="myGroup2">
+            <field name="field1">
+                <fm-validators:required-validator message="required ${displayName}" />
+            </field>
+        </group>
+    </services:form>
+
+</beans:beans>
